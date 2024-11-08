@@ -1,0 +1,67 @@
+import pandas as pd
+from sklearn.preprocessing import LabelEncoder, StandardScaler
+
+# Function to clean the data: handle missing values and invalid dataa
+def clean_data(df):
+    # Remove rows with NaN values
+    df_cleaned = df.dropna()
+    
+    # Optionally, you could remove invalid values like negative integers in certain columns
+    df_cleaned = df_cleaned[df_cleaned['Age'] >= 0]  # Example: Removing negative ages
+    
+    return df_cleaned
+
+# Function to transform the data: handle string columns and scale numeric features
+def transform_data(df):
+    # Encoding string data into integers (Label Encoding for categorical data)
+    label_encoder = LabelEncoder()
+    df['Gender'] = label_encoder.fit_transform(df['Gender'])  # Assuming Gender column has 'Male'/'Female'
+    
+    # Scaling numeric features (Age, Score, Income)
+    scaler = StandardScaler()
+    numeric_cols = ['Age', 'Score', 'Income']
+    df[numeric_cols] = scaler.fit_transform(df[numeric_cols])
+    
+    return df
+
+# Function to prepare data: split features and target for AI model training
+def prepare_data(df, target_column):
+    # Split the features (X) and the target/label (y)
+    X = df.drop(target_column, axis=1)  # Features
+    y = df[target_column]  # Target
+    
+    return X, y
+
+def main():
+    # Example raw data with string and numeric types
+    raw_data = {
+        'Name': ['Alice', 'Bob', 'Charlie', 'David', 'Eve'],
+        'Gender': ['Female', 'Male', 'Male', 'Female', 'Female'],
+        'Age': [25, 30, -1, 40, 22],  # One invalid negative age
+        'Income': [50000, 60000, 55000, 45000, None],  # One missing income
+        'Score': [85, 95, None, 60, 70],  # One missing score
+        'Label': [1, 0, 1, 0, 1]  # Target column for AI model
+    }
+    
+    # Convert raw data into a DataFrame
+    df = pd.DataFrame(raw_data)
+    
+    print("Raw Data:\n", df)
+    
+    # Step 1: Clean the data
+    df_cleaned = clean_data(df)
+    print("\nCleaned Data:\n", df_cleaned)
+    
+    # Step 2: Transform the data (encoding, scaling)
+    df_transformed = transform_data(df_cleaned)
+    print("\nTransformed Data:\n", df_transformed)
+    
+    # Step 3: Prepare the data for AI model training (split features and labels)
+    target_column = 'Label'
+    X, y = prepare_data(df_transformed, target_column)
+    
+    print("\nFeatures (X):\n", X)
+    print("\nTarget (y):\n", y)
+
+if __name__ == "__main__":
+    main()
